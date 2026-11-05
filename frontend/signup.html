@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System - Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom spinner for loading state */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #ffffff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        .btn-loading .spinner {
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-white flex min-h-screen">
+
+    <!-- Left Side: Branding / Decorative -->
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-700 to-purple-800 justify-center items-center p-12 relative overflow-hidden">
+        <!-- Background decoration -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+            <svg class="absolute transform -translate-x-1/2 -translate-y-1/2 top-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <circle cx="50" cy="50" r="40" fill="currentColor" />
+            </svg>
+        </div>
+        
+        <div class="z-10 text-white max-w-lg">
+            <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-sm border border-white/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold mb-4 leading-tight">Join Our Community.</h1>
+            <p class="text-lg text-indigo-100 font-light">Create an account to browse courses, manage your enrollments, and kickstart your learning journey.</p>
+        </div>
+    </div>
+
+    <!-- Right Side: Signup Form -->
+    <div class="flex w-full lg:w-1/2 justify-center items-center p-8 sm:p-12 bg-gray-50 lg:bg-white overflow-y-auto">
+        <div class="w-full max-w-lg py-8">
+            
+            <!-- Mobile Header (Visible only on small screens) -->
+            <div class="lg:hidden text-center mb-8">
+                <div class="bg-indigo-600 text-white w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Create Account</h2>
+                <p class="text-sm text-gray-500 mt-1">Fill in the details to get started</p>
+            </div>
+
+            <!-- Desktop Header -->
+            <div class="hidden lg:block mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Create an Account</h2>
+                <p class="text-gray-500">Let's get you set up with your student profile.</p>
+            </div>
+
+            <!-- Alert Message Container -->
+            <div id="alertBox" class="hidden mb-6 p-4 rounded-lg text-sm font-medium"></div>
+
+            <!-- Form -->
+            <form id="signupForm" class="space-y-4">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Full Name Input -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="name" name="name" required
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm transition-shadow bg-gray-50/50"
+                            placeholder="John Doe">
+                    </div>
+
+                    <!-- Username Input -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="username" name="username" required
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm transition-shadow bg-gray-50/50"
+                            placeholder="johndoe123">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Email Input -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="email" name="email" required
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm transition-shadow bg-gray-50/50"
+                            placeholder="john@example.com">
+                    </div>
+
+                    <!-- Mobile No Input -->
+                    <div>
+                        <label for="mobile_no" class="block text-sm font-medium text-gray-700 mb-1">Mobile No</label>
+                        <input type="tel" id="mobile_no" name="mobile_no" required
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm transition-shadow bg-gray-50/50"
+                            placeholder="+1 234 567 8900">
+                    </div>
+                </div>
+
+                <!-- City Input -->
+                <div>
+                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input type="text" id="city" name="city" required
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm transition-shadow bg-gray-50/50"
+                        placeholder="New York">
+                </div>
+
+                <!-- Password Input -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm transition-shadow bg-gray-50/50"
+                        placeholder="••••••••">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="w-full mt-6 flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 transition-all transform active:scale-[0.98]">
+                    <span id="btnText">Sign Up</span>
+                    <div class="spinner"></div>
+                </button>
+
+                <!-- Login Link -->
+                <div class="mt-6 text-center text-sm text-gray-600">
+                    Already have an account? <a href="index.html" class="font-medium text-indigo-600 hover:text-indigo-800 transition-colors">Sign in here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('signupForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const alertBox = document.getElementById('alertBox');
+            
+            // Set your FastAPI backend URL here
+            const API_BASE_URL = 'http://127.0.0.1:8000';
+
+            const showAlert = (message, type = 'error') => {
+                alertBox.textContent = message;
+                alertBox.className = `mb-6 p-4 rounded-lg text-sm font-medium ${
+                    type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+                }`;
+                alertBox.classList.remove('hidden');
+            };
+
+            const hideAlert = () => {
+                alertBox.classList.add('hidden');
+            };
+
+            const setLoading = (isLoading) => {
+                if (isLoading) {
+                    submitBtn.classList.add('btn-loading');
+                    btnText.textContent = 'Creating account...';
+                    submitBtn.disabled = true;
+                } else {
+                    submitBtn.classList.remove('btn-loading');
+                    btnText.textContent = 'Sign Up';
+                    submitBtn.disabled = false;
+                }
+            };
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideAlert();
+                setLoading(true);
+
+                // Build payload matching your AuthReg Pydantic model
+                const payload = {
+                    username: form.username.value,
+                    mobile_no: form.mobile_no.value,
+                    name: form.name.value,
+                    email: form.email.value,
+                    city: form.city.value,
+                    password: form.password.value
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        const errorMsg = data.detail || 'Failed to create account. Username or email may already exist.';
+                        throw new Error(errorMsg);
+                    }
+
+                    // Success mapping to SignUpResponse
+                    const createdUsername = data.username;
+                    const createdUserId = data.user_id;
+
+                    showAlert(`Welcome ${createdUsername}! Account created successfully (ID: ${createdUserId}). Redirecting to login...`, 'success');
+                    form.reset();
+                    
+                    // Redirect to the login page
+                    setTimeout(() => {
+                        window.location.href = 'index.html'; 
+                    }, 2000);
+
+                } catch (error) {
+                    if(error.message.includes('Failed to fetch')) {
+                         showAlert('Cannot connect to the server. Is your FastAPI backend running?');
+                    } else {
+                         showAlert(error.message);
+                    }
+                } finally {
+                    setLoading(false);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
