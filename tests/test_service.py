@@ -26,9 +26,12 @@ def test_course():
     # assert update.price == 780
 
 
-    student = StudentService(db, 145263)
+    # student = StudentService(db, 145263)
 
-    enroll_course = student.enroll_in_course(78596)
-    assert enroll_course.student_id == 145263
+    # enroll_course = student.enroll_in_course(78596)
+    # assert enroll_course.student_id == 145263
 
+    course = CourseService(db)
 
+    enrollment = course.view_enrolled_students(78596)
+    assert enrollment.enm_id == 2563223

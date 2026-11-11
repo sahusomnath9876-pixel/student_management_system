@@ -66,3 +66,9 @@ class CourseService:
         if not course_data:
             raise NotFoundError("Course Data Not Founded")
         return course_data
+
+
+    def view_enrolled_students(self, course_id : int) -> list[object]:
+        course = self.course_db.get_course(course_id)
+        enrollment = course.enrollments
+        return enrollment

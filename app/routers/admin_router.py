@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.database import get_db
 from app.services import CourseService
-from app.schemas import AddCourse, CourseDetails, UpdateCourse
+from app.schemas import AddCourse, CourseDetails, UpdateCourse, EnrollResponse
 from app.repos import UserRepo
 from .auth_router import verify_token
 from .student_router import role_check
@@ -39,3 +39,20 @@ def delete_course(course_id : int, db=Depends(get_db)):
     return{
         "detail" : f"Course Id {delete} deleted Successfuly"
     }
+
+
+@admin_router.get("/courses", response_model=list[CourseDetails])
+def get_all_courses(db=Depends(get_db)):
+    course = CourseService(db)
+
+    course_data = course.get_courses()
+    return course_data
+
+
+@admin_router.get("/enrollments", response_model=list[EnrollResponse])
+def view_enrolled_students(course_id : int, db=Depends(get_db)):
+    course = CourseService(db)
+    enrolled = course.view_enrolled_students(course_id)
+    return enrolled
+
+

@@ -23,6 +23,7 @@ class Courses(Base):
     en_start : Mapped[date] = mapped_column(Date, nullable=False)
     en_end : Mapped[date] = mapped_column(Date, nullable=False)
 
+
     enrollments : Mapped[list["EnrolledStudents"]] = relationship(back_populates="course")
     transaction : Mapped["Payments"] = relationship(back_populates="course")
 
@@ -41,6 +42,5 @@ class EnrolledStudents(Base):
     course : Mapped["Courses"] = relationship(back_populates="enrollments")
     student : Mapped["Students"] = relationship(back_populates="enrollments")
     
-
 
     

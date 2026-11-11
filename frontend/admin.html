@@ -154,7 +154,7 @@
                         <form id="deleteCourseForm" class="flex gap-4 items-end">
                             <div class="flex-grow">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Course ID to Delete</label>
-                                <input type="number" name="course_id" required class="block w-full px-3 py-2 border border-red-300 rounded focus:ring-red-500 focus:border-red-500 text-sm">
+                                <input type="number" id="delete_course_id" name="course_id" required class="block w-full px-3 py-2 border border-red-300 rounded focus:ring-red-500 focus:border-red-500 text-sm">
                             </div>
                             <button type="submit" id="deleteBtn" class="flex-shrink-0 flex justify-center items-center py-2.5 px-6 rounded text-sm font-medium text-white bg-gray-900 hover:bg-black transition-colors">
                                 <span id="deleteBtnText">Delete</span>
@@ -166,7 +166,43 @@
 
             </div>
         </div>
+
+        <!-- All Courses List Section -->
+        <div class="mt-8 bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-gray-800">All Courses</h2>
+                <button id="refreshCoursesBtn" class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Refresh
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="allCoursesList" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                    <div class="text-center py-10 text-gray-500 flex flex-col items-center">
+                        <div class="spinner !block mb-4" style="border-width: 3px; border-color: rgba(0,0,0, 0.1); border-top-color: #4b5563;"></div>
+                        Loading courses...
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <!-- Enrollments Modal -->
+    <div id="enrollmentsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden transform transition-all">
+            <div class="p-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800" id="enrollmentsModalTitle">Course Enrollments</h3>
+                <button id="closeEnrollmentsBtn" class="text-gray-400 hover:text-gray-600 transition-colors p-1">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 max-h-[70vh] overflow-y-auto bg-white" id="enrollmentsContent">
+                <!-- Data injected here -->
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -182,7 +218,7 @@
                 // window.location.href = 'student_service.html';
             }
 
-            const API_BASE_URL = 'http://127.0.0.1:8000';
+            const API_BASE_URL = 'http://localhost:8000';
             const ADMIN_PREFIX = '/admin'; 
 
             const globalAlert = document.getElementById('globalAlert');
@@ -228,6 +264,121 @@
                 return [year, month, day].join('-');
             };
 
+            // DOM Elements for New Features
+            const allCoursesList = document.getElementById('allCoursesList');
+            const refreshCoursesBtn = document.getElementById('refreshCoursesBtn');
+            const enrollmentsModal = document.getElementById('enrollmentsModal');
+            const enrollmentsContent = document.getElementById('enrollmentsContent');
+            const enrollmentsModalTitle = document.getElementById('enrollmentsModalTitle');
+            const closeEnrollmentsBtn = document.getElementById('closeEnrollmentsBtn');
+            
+            const updateCourseIdInput = document.querySelector('#updateCourseForm input[name="course_id"]');
+            const deleteCourseIdInput = document.getElementById('delete_course_id');
+
+            // --- Course Loading Logic ---
+            const loadCourses = async () => {
+                allCoursesList.innerHTML = `<div class="text-center py-10 text-gray-500 flex flex-col items-center"><div class="spinner !block mb-4" style="border-width: 3px; border-color: rgba(0,0,0, 0.1); border-top-color: #4b5563;"></div>Loading courses...</div>`;
+                try {
+                    const response = await fetch(`${API_BASE_URL}${ADMIN_PREFIX}/courses`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch courses');
+                    const courses = await response.json();
+
+                    if (!courses || courses.length === 0) {
+                        allCoursesList.innerHTML = `<div class="text-center py-6 text-gray-500">No courses available.</div>`;
+                    } else {
+                        allCoursesList.innerHTML = courses.map(course => `
+                            <div class="p-5 bg-white border border-gray-200 rounded-lg flex flex-col lg:flex-row justify-between gap-4 items-start lg:items-center hover:border-gray-300 hover:shadow-sm transition-all">
+                                <div class="w-full lg:w-auto">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h4 class="font-bold text-gray-900 text-lg">${course.course_name}</h4>
+                                        <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">ID: ${course.course_id}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700 mb-1"><span class="font-semibold text-gray-500">Price:</span> ₹${course.price} <span class="mx-2 text-gray-300">|</span> <span class="font-semibold text-gray-500">Duration:</span> ${course.course_duration}</p>
+                                    <p class="text-xs text-gray-500"><span class="font-semibold">Enrollment:</span> ${course.en_start} to ${course.en_end}</p>
+                                </div>
+                                <div class="flex flex-wrap gap-2 w-full lg:w-auto mt-2 lg:mt-0">
+                                    <button onclick="viewEnrollments(${course.course_id}, '${course.course_name.replace(/'/g, "\\'")}')" class="flex-grow lg:flex-grow-0 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-sm font-medium hover:bg-blue-100 transition-colors text-center">
+                                        View Enrollments
+                                    </button>
+                                    <button onclick="prefillUpdate(${course.course_id})" class="flex-grow lg:flex-grow-0 px-4 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-md text-sm font-medium hover:bg-yellow-100 transition-colors text-center">
+                                        Update
+                                    </button>
+                                    <button onclick="prefillDelete(${course.course_id})" class="flex-grow lg:flex-grow-0 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-md text-sm font-medium hover:bg-red-100 transition-colors text-center">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                } catch (error) {
+                    allCoursesList.innerHTML = `<div class="text-center py-6 text-red-500 text-sm font-medium">Failed to load courses: ${error.message}</div>`;
+                }
+            };
+
+            // Global functions for inline event handlers
+            window.prefillUpdate = (courseId) => {
+                updateCourseIdInput.value = courseId;
+                updateCourseIdInput.focus();
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            };
+
+            window.prefillDelete = (courseId) => {
+                deleteCourseIdInput.value = courseId;
+                deleteCourseIdInput.focus();
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            };
+
+            window.viewEnrollments = async (courseId, courseName) => {
+                enrollmentsModalTitle.textContent = `Enrollments: ${courseName} (ID: ${courseId})`;
+                enrollmentsModal.classList.remove('hidden');
+                enrollmentsContent.innerHTML = `<div class="flex justify-center py-8"><div class="spinner !block" style="border-width: 3px; border-color: rgba(0,0,0, 0.1); border-top-color: #4b5563;"></div></div>`;
+                
+                try {
+                    const response = await fetch(`${API_BASE_URL}${ADMIN_PREFIX}/enrollments?course_id=${courseId}`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    
+                    if (!response.ok) throw new Error("Failed to fetch enrollments.");
+                    const enrollments = await response.json();
+                    
+                    if (!enrollments || enrollments.length === 0) {
+                        enrollmentsContent.innerHTML = `<div class="text-center py-8 text-gray-500 bg-gray-50 rounded border border-dashed border-gray-300">No students enrolled in this course yet.</div>`;
+                        return;
+                    }
+                    
+                    enrollmentsContent.innerHTML = enrollments.map(enm => `
+                        <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div class="space-y-1">
+                                <p class="text-sm text-gray-800"><span class="font-bold text-gray-500">Enrollment ID:</span> <span class="font-semibold">${enm.enm_id}</span></p>
+                                <p class="text-sm text-gray-800"><span class="font-bold text-gray-500">Student ID:</span> <span class="font-semibold text-blue-600">${enm.student_id}</span></p>
+                            </div>
+                            <div class="w-full sm:w-auto text-left sm:text-right">
+                                <p class="text-xs text-gray-500 font-bold mb-1">Transaction ID</p>
+                                <p class="text-xs font-mono bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-md inline-block break-all w-full sm:max-w-[200px] shadow-sm">${enm.txn_id}</p>
+                            </div>
+                        </div>
+                    `).join('');
+
+                } catch (error) {
+                    enrollmentsContent.innerHTML = `<div class="text-red-500 text-center py-6 text-sm bg-red-50 rounded border border-red-200">${error.message}</div>`;
+                }
+            };
+
+            // Modal Close Listeners
+            closeEnrollmentsBtn.addEventListener('click', () => enrollmentsModal.classList.add('hidden'));
+            enrollmentsModal.addEventListener('click', (e) => {
+                if (e.target === enrollmentsModal) enrollmentsModal.classList.add('hidden');
+            });
+
+            // Initialize List & Refresh
+            loadCourses();
+            refreshCoursesBtn.addEventListener('click', loadCourses);
+
             // 1. ADD COURSE
             document.getElementById('addCourseForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -258,6 +409,7 @@
                     
                     showAlert(`Successfully added course: ${data.course_name} (ID: ${data.course_id})`, 'success');
                     form.reset();
+                    loadCourses(); // Refresh list automatically
                 } catch (error) {
                     showAlert(error.message, 'error');
                 } finally {
@@ -298,6 +450,7 @@
                     
                     showAlert(`Successfully updated ${data.updated_type} for Course ID ${data.course_id}`, 'success');
                     form.reset();
+                    loadCourses(); // Refresh list automatically
                 } catch (error) {
                     showAlert(error.message, 'error');
                 } finally {
@@ -327,6 +480,7 @@
                     
                     showAlert(data.detail || 'Course deleted successfully', 'success');
                     form.reset();
+                    loadCourses(); // Refresh list automatically
                 } catch (error) {
                     showAlert(error.message, 'error');
                 } finally {

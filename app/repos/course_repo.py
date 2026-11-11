@@ -119,3 +119,6 @@ class EnrollmentRepo:
             self.__db.rollback()
             logger.exception("Database Error While Deleting the enrollment")
             raise
+
+
+    
